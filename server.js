@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import listEndpoints from "express-list-endpoints";
 
 import flowerData from "./data/flowers.json";
 
@@ -12,7 +13,11 @@ app.use(express.json());
 
 // TODO: add documentation of the API here with express-list-endpoints
 app.get("/", (req, res) => {
-  res.send("Hello Technigo! ❤️");
+  const endpoints = listEndpoints(app);
+  res.json({
+    message: "Welcome to the flower API",
+    endpoints: endpoints,
+  });
 });
 
 // endpoint for getting all flowers
