@@ -1,11 +1,8 @@
-import cors from "cors";
 import express from "express";
+import cors from "cors";
 
 import flowerData from "./data/flowers.json";
 
-// Defines the port the app will run on. Defaults to 8080, but can be overridden
-// when starting the server. Example command to overwrite PORT env variable value:
-// PORT=9000 npm start
 const port = process.env.PORT || 8080;
 const app = express();
 
@@ -13,30 +10,40 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Start defining your routes here
+// TODO: add documentation of the API here with express-list-endpoints
 app.get("/", (req, res) => {
-  res.send("Hello Technigo!");
+  res.send("Hello Technigo! ❤️");
 });
 
 // endpoint for getting all flowers
+// TODO: add query params to be able to filter on color or sort by name
 app.get("/flowers", (req, res) => {
-  res.send(flowerData);
+  const { color, size } = req.query;
+
+  let filteredFlowers = flowerData;
+
+  if (color) {
+    filteredFlowers = filteredFlowers.filter(
+      (flower) => flower.color.toLowerCase() === color.toLowerCase()
+    );
+  }
+  if (size) {
+    filteredFlowers = filteredFlowers.filter(
+      (flower) => flower.size.toLowerCase() === size.toLowerCase()
+    );
+  }
+
+  res.json(filteredFlowers);
 });
 
-//endpoint for one flower
+// endpoint for gettin one flower
 app.get("/flowers/:id", (req, res) => {
-  const flower = flowerData.find((flower) => flower.id === req.params.id);
-  res.json(flower);
-});
-
-app.get("flowers/:id", (req, res) => {
-  console.log("req.params.id", req.params.id);
-  console.log("flower.id", flower.id);
-
+  // be aware! The id that comes from the param is of type string. and in our json it is of type number. You have to turn them into the same type before you can compare them. trun a string to a number by adding + 👇
   const flower = flowerData.find((flower) => flower.id === +req.params.id);
 
+  // tiny error handling if we get an id that doesnt exist in our data
   if (!flower) {
-    return res.status(res.status(404).json({ error: "flower not found" }));
+    return res.status(404).json({ error: "flower not found" });
   }
 
   res.json(flower);
