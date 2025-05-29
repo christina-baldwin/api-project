@@ -23,18 +23,18 @@ app.get("/", (req, res) => {
 // ROUTES AND ENDPOINTS //
 // get all thoughts
 app.get("/thoughts", (req, res) => {
-  const { category, minHearts, sortBy, page = 1, limit = 10 } = req.query;
+  const { category, sortBy, page = 1, limit = 10 } = req.query;
 
-  let filtered = data;
+  let filteredThoughts = data;
 
   if (category) {
-    filtered = filtered.filter(
+    filteredThoughts = filteredThoughts.filter(
       (item) => item.category.toLowerCase() === category.toLowerCase()
     );
   }
 
   if (sortBy === "date") {
-    filtered = filtered.sort(
+    filteredThoughts = filteredThoughts.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
   }
@@ -42,13 +42,13 @@ app.get("/thoughts", (req, res) => {
   const start = (page - 1) * limit;
   const end = start + +limit;
 
-  const paginated = filtered.slice(start, end);
+  const paginatedThoughts = filteredThoughts.slice(start, end);
 
   res.json({
     page: +page,
     limit: +limit,
-    total: filtered.length,
-    thoughts: paginated,
+    total: filteredThoughts.length,
+    thoughts: paginatedThoughts,
   });
 });
 
