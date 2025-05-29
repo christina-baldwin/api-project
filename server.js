@@ -21,59 +21,41 @@ app.get("/", (req, res) => {
 });
 
 // routes and endpoints
-app.get("/thoughts", (req, res) => res.send("getThoughts placeholder"));
-
-app.delete("/thoughts:id", (req, res) =>
-  res.send("deleteThoughts placeholder")
-);
-
-app.get("/thoughts/liked/:clientId", (req, res) =>
-  res.send("likedThoughts placeholder")
-);
-
-app.post("/thoughts", (req, res) => res.send("postThought placeholder"));
-
-app.post("/thoughts/:id/like", (req, res) =>
-  res.send("likeThought placeholder")
-);
-
-app.delete("/thoughts/:id/like", (req, res) =>
-  res.send("unlikeThought placeholder")
-);
-
-// endpoint for getting all flowers
-// TODO: add query params to be able to filter on color or sort by name
-app.get("/flowers", (req, res) => {
-  const { color, size } = req.query;
-
-  let filteredFlowers = data;
-
-  if (color) {
-    filteredFlowers = filteredFlowers.filter(
-      (flower) => flower.color.toLowerCase() === color.toLowerCase()
-    );
-  }
-  if (size) {
-    filteredFlowers = filteredFlowers.filter(
-      (flower) => flower.size.toLowerCase() === size.toLowerCase()
-    );
-  }
-
-  res.json(filteredFlowers);
+// get all thoughts
+app.get("/thoughts", (req, res) => {
+  res.json(data);
 });
 
-// endpoint for gettin one flower
-app.get("/flowers/:id", (req, res) => {
-  // be aware! The id that comes from the param is of type string. and in our json it is of type number. You have to turn them into the same type before you can compare them. trun a string to a number by adding + 👇
-  const flower = data.find((flower) => flower.id === +req.params.id);
+// get one thought
+app.get("/thoughts/:id", (req, res) => {
+  const { id } = req.params;
+  const thought = data.find((item) => item.id === +id);
 
-  // tiny error handling if we get an id that doesnt exist in our data
-  if (!flower) {
-    return res.status(404).json({ error: "flower not found" });
+  if (!thought) {
+    return res.status(404).json({ error: "Thought not found" });
   }
 
-  res.json(flower);
+  res.json(thought);
 });
+
+// get liked thoughts
+app.get("/thoughts/liked/:clientId", (req, res) => {
+  const { clientId } = req.params;
+  const likedThoughts = data.filter((thought) =>
+    thought.likedBy.includes(clientId)
+  );
+
+  res.json(likedThoughts);
+});
+
+// cant do these yet i think (maybe next week?)
+app.delete("/thoughts:id", (req, res) => res.send("placeholder"));
+
+app.post("/thoughts", (req, res) => res.send("placeholder"));
+
+app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
+
+app.delete("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
 // Start the server
 app.listen(port, () => {
