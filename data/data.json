@@ -1,10 +1,42 @@
 [
   {
-    "_id": "1",
-    "message": "This is a thought",
+    "id": 1,
+    "message": "I finally fixed the login bug! 🎉",
+    "category": "project",
     "hearts": 3,
-    "createdAt": "2025-05-29T12:00:00.000Z",
-    "likedBy": ["client1", "client2", "client3"],
-    "category": "Project"
+    "createdAt": "2024-06-01T10:30:00Z",
+    "likedBy": ["user123"]
+  },
+  {
+    "id": 2,
+    "message": "Meal prepped for the week. Feeling organized!",
+    "category": "home",
+    "hearts": 5,
+    "createdAt": "2024-06-03T08:15:00Z",
+    "likedBy": []
+  },
+  {
+    "id": 3,
+    "message": "Pasta night with friends 🍝❤️",
+    "category": "food",
+    "hearts": 8,
+    "createdAt": "2024-06-05T19:00:00Z",
+    "likedBy": ["user123", "user456"]
+  },
+  {
+    "id": 4,
+    "message": "Started a new React project today!",
+    "category": "project",
+    "hearts": 4,
+    "createdAt": "2024-06-06T14:00:00Z",
+    "likedBy": []
+  },
+  {
+    "id": 5,
+    "message": "Cleaned the whole apartment and lit some candles 🕯️",
+    "category": "home",
+    "hearts": 2,
+    "createdAt": "2024-06-07T09:00:00Z",
+    "likedBy": ["user789"]
   }
 ]
