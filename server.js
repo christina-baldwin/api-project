@@ -7,11 +7,11 @@ import data from "./data/data.json";
 const port = process.env.PORT || 8080;
 const app = express();
 
-// Add middlewares to enable cors and json body parsing
+// MIDDLEWARES //
 app.use(cors());
 app.use(express.json());
 
-// documentation of the API
+// API DOCUMENTATION //
 app.get("/", (req, res) => {
   const endpoints = listEndpoints(app);
   res.json({
@@ -20,10 +20,36 @@ app.get("/", (req, res) => {
   });
 });
 
-// routes and endpoints
+// ROUTES AND ENDPOINTS //
 // get all thoughts
 app.get("/thoughts", (req, res) => {
-  res.json(data);
+  const { category, minHearts, sortBy, page = 1, limit = 10 } = req.query;
+
+  let filtered = data;
+
+  if (category) {
+    filtered = filtered.filter(
+      (item) => item.category.toLowerCase() === category.toLowerCase()
+    );
+  }
+
+  if (sortBy === "date") {
+    filtered = filtered.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }
+
+  const start = (page - 1) * limit;
+  const end = start + +limit;
+
+  const paginated = filtered.slice(start, end);
+
+  res.json({
+    page: +page,
+    limit: +limit,
+    total: filtered.length,
+    thoughts: paginated,
+  });
 });
 
 // get one thought
@@ -57,7 +83,7 @@ app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
 app.delete("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
-// Start the server
+// SERVER START //
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

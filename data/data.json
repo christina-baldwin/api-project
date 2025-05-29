@@ -1,9 +1,10 @@
 [
   {
-    "_id": "abc123",
+    "_id": "1",
     "message": "This is a thought",
     "hearts": 3,
     "createdAt": "2025-05-29T12:00:00.000Z",
-    "likedBy": ["client1", "client2", "client3"]
+    "likedBy": ["client1", "client2", "client3"],
+    "category": "Project"
   }
 ]
