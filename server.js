@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import listEndpoints from "express-list-endpoints";
+import mongoose from "mongoose";
 
 import data from "./data/data.json";
 
@@ -11,8 +12,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
+mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.Promise = Promise;
+
+// adapt this for the thoughts instead
+const Animal = mongoose.model("Animal", {
+  name: String,
+  age: Number,
+  isFurry: Boolean,
+});
+
+Animal.deleteMany().then(() => {
+  new Animal({
+    name: "Alfons",
+    age: 2,
+    isFurry: true,
+  }).save();
+});
+
 // API DOCUMENTATION //
 app.get("/", (req, res) => {
+  Animal.find().then((animals) => {
+    res.json(animals);
+  });
+
   const endpoints = listEndpoints(app);
   res.json({
     message: "Welcome to the Happy Thougts API",
