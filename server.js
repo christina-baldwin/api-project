@@ -28,6 +28,8 @@ const thoughtSchema = new mongoose.Schema({
   },
 });
 
+const Thought = mongoose.model("Thought", thoughtSchema);
+
 Thought.deleteMany().then(() => {
   new Thought({
     name: "Alfons",
