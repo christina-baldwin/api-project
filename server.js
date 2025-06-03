@@ -22,7 +22,7 @@ const thoughtSchema = new mongoose.Schema({
   message: String,
   hearts: Number,
   likedBy: [String],
-  created: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },
@@ -55,10 +55,10 @@ app.get("/", (req, res) => {
 
 // ROUTES AND ENDPOINTS //
 // get all thoughts
-app.get("/thoughts", (req, res) => {
+app.get("/thoughts", async (req, res) => {
   const { category, sortBy, page = 1, limit = 10 } = req.query;
 
-  let filteredThoughts = data;
+  let filteredThoughts = await Thought.find();
 
   if (category) {
     filteredThoughts = filteredThoughts.filter(
