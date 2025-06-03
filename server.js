@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import listEndpoints from "express-list-endpoints";
 import mongoose from "mongoose";
 
@@ -12,19 +12,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// connect to database
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.Promise = Promise;
+mongoose.connect(mongoUrl);
 
-// adapt this for the thoughts instead
-const Animal = mongoose.model("Animal", {
-  name: String,
-  age: Number,
-  isFurry: Boolean,
+// CHECK THIS
+const thoughtSchema = new mongoose.Schema({
+  id: Number,
+  message: String,
+  hearts: Number,
+  likedBy: [String],
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-Animal.deleteMany().then(() => {
-  new Animal({
+Thought.deleteMany().then(() => {
+  new Thought({
     name: "Alfons",
     age: 2,
     isFurry: true,
@@ -33,8 +38,8 @@ Animal.deleteMany().then(() => {
 
 // API DOCUMENTATION //
 app.get("/", (req, res) => {
-  Animal.find().then((animals) => {
-    res.json(animals);
+  Thought.find().then((thoughts) => {
+    res.json(thoughts);
   });
 
   const endpoints = listEndpoints(app);
