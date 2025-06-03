@@ -16,7 +16,7 @@ app.use(express.json());
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
 mongoose.connect(mongoUrl);
 
-// CHECK THIS
+// DB CONNECTION (CHECK THIS!)
 const thoughtSchema = new mongoose.Schema({
   id: Number,
   message: String,
@@ -30,19 +30,21 @@ const thoughtSchema = new mongoose.Schema({
 
 const Thought = mongoose.model("Thought", thoughtSchema);
 
-Thought.deleteMany().then(() => {
-  new Thought({
-    name: "Alfons",
-    age: 2,
-    isFurry: true,
-  }).save();
-});
+if ((process.env.RESET_DB = "true")) {
+  const seedDatabase = async () => {
+    await Thought.deleteMany({});
+    data.forEach((thought) => {
+      new Thought(thought).save();
+    });
+  };
+  seedDatabase();
+}
 
 // API DOCUMENTATION //
 app.get("/", (req, res) => {
-  Thought.find().then((thoughts) => {
-    res.json(thoughts);
-  });
+  // Thought.find().then((thoughts) => {
+  //   res.json(thoughts);
+  // });
 
   const endpoints = listEndpoints(app);
   res.json({
