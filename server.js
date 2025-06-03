@@ -58,19 +58,10 @@ app.get("/", (req, res) => {
 app.get("/thoughts", async (req, res) => {
   const { category, sortBy, page = 1, limit = 10 } = req.query;
 
+  // why do this???
+  // const query = {}
+
   let filteredThoughts = await Thought.find();
-
-  if (category) {
-    filteredThoughts = filteredThoughts.filter(
-      (item) => item.category.toLowerCase() === category.toLowerCase()
-    );
-  }
-
-  if (sortBy === "date") {
-    filteredThoughts = filteredThoughts.sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  }
 
   const start = (page - 1) * limit;
   const end = start + +limit;
@@ -83,6 +74,40 @@ app.get("/thoughts", async (req, res) => {
     total: filteredThoughts.length,
     thoughts: paginatedThoughts,
   });
+
+  // error handling
+  try {
+    if (filteredThoughts === 0) {
+      res.status(404).json({
+        success: false,
+        response: [],
+        message: "No thoughts found for that query. Please try another one.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      response: filteredThoughts,
+      message: "Successful query.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error,
+      message: "Something went wrong. Please check back later.",
+    });
+  }
+
+  if (category) {
+    filteredThoughts = filteredThoughts.filter(
+      (item) => item.category.toLowerCase() === category.toLowerCase()
+    );
+  }
+
+  if (sortBy === "date") {
+    filteredThoughts = filteredThoughts.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }
 });
 
 // get one thought
