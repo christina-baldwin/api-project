@@ -12,16 +12,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// connect to database
+// MONGO DB CONNECTION //
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
 mongoose.connect(mongoUrl);
+mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 
-// DB CONNECTION (CHECK THIS!)
+// SCHEMA //
 const thoughtSchema = new mongoose.Schema({
   id: Number,
   message: String,
   hearts: Number,
   likedBy: [String],
+  category: String,
   createdAt: {
     type: Date,
     default: Date.now,
@@ -30,109 +32,123 @@ const thoughtSchema = new mongoose.Schema({
 
 const Thought = mongoose.model("Thought", thoughtSchema);
 
-if ((process.env.RESET_DB = "true")) {
-  const seedDatabase = async () => {
-    await Thought.deleteMany({});
-    data.forEach((thought) => {
-      new Thought(thought).save();
-    });
-  };
-  seedDatabase();
-}
+// Seed database
+const seedDatabase = async () => {
+  await Thought.deleteMany({});
+  data.forEach((thought) => {
+    new Thought(thought).save();
+  });
+};
+seedDatabase();
 
 // API DOCUMENTATION //
 app.get("/", (req, res) => {
-  // Thought.find().then((thoughts) => {
-  //   res.json(thoughts);
-  // });
-
   const endpoints = listEndpoints(app);
   res.json({
-    message: "Welcome to the Happy Thougts API",
+    message: "Welcome to the Happy Thoughts API",
     endpoints: endpoints,
   });
 });
 
-// ROUTES AND ENDPOINTS //
-// get all thoughts
+// GET ALL THOUGHTS
 app.get("/thoughts", async (req, res) => {
   const { category, sortBy, page = 1, limit = 10 } = req.query;
 
-  // why do this???
-  // const query = {}
-
-  let filteredThoughts = await Thought.find();
-
-  const start = (page - 1) * limit;
-  const end = start + +limit;
-
-  const paginatedThoughts = filteredThoughts.slice(start, end);
-
-  res.json({
-    page: +page,
-    limit: +limit,
-    total: filteredThoughts.length,
-    thoughts: paginatedThoughts,
-  });
-
-  // error handling
   try {
-    if (filteredThoughts === 0) {
-      res.status(404).json({
+    let thoughts = await Thought.find();
+
+    // Filter by category
+    if (category) {
+      thoughts = thoughts.filter(
+        (item) => item.category?.toLowerCase() === category.toLowerCase()
+      );
+    }
+
+    // Sort by date
+    if (sortBy === "date") {
+      thoughts = thoughts.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    }
+
+    // Paginate
+    const start = (page - 1) * limit;
+    const end = start + +limit;
+    const paginatedThoughts = thoughts.slice(start, end);
+
+    if (paginatedThoughts.length === 0) {
+      return res.status(404).json({
         success: false,
+        message: "No thoughts found for that query.",
         response: [],
-        message: "No thoughts found for that query. Please try another one.",
       });
     }
+
     res.status(200).json({
       success: true,
-      response: filteredThoughts,
-      message: "Successful query.",
+      message: "Thoughts retrieved successfully.",
+      page: +page,
+      limit: +limit,
+      total: thoughts.length,
+      response: paginatedThoughts,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
+      message: "Error fetching thoughts.",
       response: error,
-      message: "Something went wrong. Please check back later.",
     });
   }
+});
 
-  if (category) {
-    filteredThoughts = filteredThoughts.filter(
-      (item) => item.category.toLowerCase() === category.toLowerCase()
-    );
-  }
+// GET ONE THOUGHT BY ID
+app.get("/thoughts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const thought = await Thought.findOne({ id: +id });
 
-  if (sortBy === "date") {
-    filteredThoughts = filteredThoughts.sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
+    if (!thought) {
+      return res.status(404).json({
+        success: false,
+        message: "Thought not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Thought found.",
+      response: thought,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error finding thought.",
+      response: error,
+    });
   }
 });
 
-// get one thought
-app.get("/thoughts/:id", (req, res) => {
-  const { id } = req.params;
-  const thought = data.find((item) => item.id === +id);
+// GET LIKED THOUGHTS FOR A USER
+app.get("/thoughts/liked/:clientId", async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const likedThoughts = await Thought.find({ likedBy: clientId });
 
-  if (!thought) {
-    return res.status(404).json({ error: "Thought not found" });
+    res.status(200).json({
+      success: true,
+      message: "Liked thoughts retrieved.",
+      response: likedThoughts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving liked thoughts.",
+      response: error,
+    });
   }
-
-  res.json(thought);
 });
 
-// get liked thoughts
-app.get("/thoughts/liked/:clientId", (req, res) => {
-  const { clientId } = req.params;
-  const likedThoughts = data.filter((thought) =>
-    thought.likedBy.includes(clientId)
-  );
-
-  res.json(likedThoughts);
-});
-
-// cant do these yet i think (maybe next week?)
+// PLACEHOLDER ROUTES //
 app.delete("/thoughts:id", (req, res) => res.send("placeholder"));
 
 app.post("/thoughts", (req, res) => res.send("placeholder"));
@@ -141,7 +157,7 @@ app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
 app.delete("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
-// SERVER START //
+// START SERVER //
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
