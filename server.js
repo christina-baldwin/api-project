@@ -166,9 +166,35 @@ app.post("/thoughts", async (req, res) => {
   }
 });
 
-// PLACEHOLDER ROUTES //
-app.delete("/thoughts:id", (req, res) => res.send("placeholder"));
+// DELETE THOUGHT
+app.delete("/thoughts:id", async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    const thought = await Thought.findByIdAndDelete(id);
+
+    if (!thought) {
+      res.status(404).json({
+        success: false,
+        response: null,
+        message: "Thought could not be found. Can't delete,",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      response: thought,
+      message: "Thought successfully deleted.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error,
+      message: "Couldn't delete thought.",
+    });
+  }
+});
+
+// PLACEHOLDER ROUTES //
 app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
 app.delete("/thoughts/:id/like", (req, res) => res.send("placeholder"));
