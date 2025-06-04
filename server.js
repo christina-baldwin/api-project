@@ -19,15 +19,12 @@ mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 
 // SCHEMA //
 const thoughtSchema = new mongoose.Schema({
-  id: Number,
-  message: String,
-  hearts: Number,
-  likedBy: [String],
-  category: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  id: { type: Number, default: Date.now }, // ok!
+  message: { type: String, required: true },
+  hearts: { type: Number, default: 0 },
+  likedBy: { type: [String], default: [] },
+  category: { type: String, default: "General" },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Thought = mongoose.model("Thought", thoughtSchema);
@@ -148,10 +145,29 @@ app.get("/thoughts/liked/:clientId", async (req, res) => {
   }
 });
 
+// POST THOUGHT (check what we are sending)
+app.post("/thoughts", async (req, res) => {
+  const { message, category } = req.body;
+
+  try {
+    const newThought = await new Thought({ message, category }).save();
+
+    res.status(200).json({
+      success: true,
+      response: newThought,
+      message: "Thought created successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error,
+      message: "Couldn't create thought.",
+    });
+  }
+});
+
 // PLACEHOLDER ROUTES //
 app.delete("/thoughts:id", (req, res) => res.send("placeholder"));
-
-app.post("/thoughts", (req, res) => res.send("placeholder"));
 
 app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
 
