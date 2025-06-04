@@ -20,7 +20,7 @@ mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 // SCHEMA //
 const thoughtSchema = new mongoose.Schema({
   id: { type: Number, default: Date.now }, // ok!
-  message: { type: String, required: true },
+  message: { type: String, required: true, minlength: 3 },
   hearts: { type: Number, default: 0 },
   likedBy: { type: [String], default: [] },
   category: { type: String, default: "General" },
@@ -190,6 +190,41 @@ app.delete("/thoughts:id", async (req, res) => {
       success: false,
       response: error,
       message: "Couldn't delete thought.",
+    });
+  }
+});
+
+// PATCH A THOUGHT
+app.patch("thoughts/:id", async (req, res) => {
+  const { id } = req.params;
+  const { newMessage } = req.body;
+
+  try {
+    const thought = await Thought.findByIdAndUpdate(
+      id,
+      {
+        message: newMessage,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!thought) {
+      return res.status(404).json({
+        success: false,
+        response: null,
+        messsage: "Thought couldn't be found.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      response: thought,
+      message: "Thought updated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      response: error,
+      message: "Thought unable to be updated.",
     });
   }
 });
