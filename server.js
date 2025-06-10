@@ -19,7 +19,7 @@ mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 
 // SCHEMA //
 const thoughtSchema = new mongoose.Schema({
-  id: { type: Number, default: Date.now }, // ok!
+  id: { type: Number, default: Date.now },
   message: { type: String, required: true, minlength: 3 },
   hearts: { type: Number, default: 0 },
   likedBy: { type: [String], default: [] },
