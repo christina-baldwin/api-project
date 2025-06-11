@@ -230,14 +230,68 @@ app.patch("/thoughts/:id", authenticate, async (req, res) => {
   }
 });
 
-// PLACEHOLDER ROUTES //
-app.post("/thoughts/:id/like", authenticate, (req, res) =>
-  res.send("placeholder")
-);
+// LIKE
+app.post("/thoughts/:id/like", authenticate, async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
 
-app.delete("/thoughts/:id/like", authenticate, (req, res) =>
-  res.send("placeholder")
-);
+    if (!thought) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Thought not found" });
+    }
+
+    if (thought.likedBy.includes(req.user.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already liked this thought",
+      });
+    }
+
+    thought.hearts += 1;
+    thought.likedBy.push(req.user.id);
+    await thought.save();
+
+    res.status(200).json({ success: true, message: "Thought liked", thought });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Error liking thought", error });
+  }
+});
+
+// UNLIKE
+app.delete("/thoughts/:id/like", authenticate, async (req, res) => {
+  try {
+    const thought = await Thought.findById(req.params.id);
+
+    if (!thought) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Thought not found" });
+    }
+
+    if (!thought.likedBy.includes(req.user.id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "You haven't liked this thought" });
+    }
+
+    thought.hearts = Math.max(0, thought.hearts - 1);
+    thought.likedBy = thought.likedBy.filter(
+      (userId) => userId !== req.user.id
+    );
+    await thought.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Thought unliked", thought });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Error unliking thought", error });
+  }
+});
 
 // START SERVER //
 app.listen(port, () => {
