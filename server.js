@@ -11,6 +11,7 @@ const app = express();
 // MIDDLEWARES //
 app.use(cors());
 app.use(express.json());
+app.use("/auth", authRoutes);
 
 // MONGO DB CONNECTION //
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
@@ -146,7 +147,7 @@ app.get("/thoughts/liked/:clientId", async (req, res) => {
 });
 
 // POST THOUGHT (check what we are sending)
-app.post("/thoughts", async (req, res) => {
+app.post("/thoughts", authenticate, async (req, res) => {
   const { message, category } = req.body;
 
   try {
@@ -167,7 +168,7 @@ app.post("/thoughts", async (req, res) => {
 });
 
 // DELETE THOUGHT
-app.delete("/thoughts/:id", async (req, res) => {
+app.delete("/thoughts/:id", authenticate, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -195,7 +196,7 @@ app.delete("/thoughts/:id", async (req, res) => {
 });
 
 // PATCH A THOUGHT
-app.patch("/thoughts/:id", async (req, res) => {
+app.patch("/thoughts/:id", authenticate, async (req, res) => {
   const { id } = req.params;
   const { newMessage } = req.body;
 
@@ -230,9 +231,13 @@ app.patch("/thoughts/:id", async (req, res) => {
 });
 
 // PLACEHOLDER ROUTES //
-app.post("/thoughts/:id/like", (req, res) => res.send("placeholder"));
+app.post("/thoughts/:id/like", authenticate, (req, res) =>
+  res.send("placeholder")
+);
 
-app.delete("/thoughts/:id/like", (req, res) => res.send("placeholder"));
+app.delete("/thoughts/:id/like", authenticate, (req, res) =>
+  res.send("placeholder")
+);
 
 // START SERVER //
 app.listen(port, () => {
