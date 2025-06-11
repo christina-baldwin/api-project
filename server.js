@@ -31,7 +31,7 @@ const thoughtSchema = new mongoose.Schema({
 
 const Thought = mongoose.model("Thought", thoughtSchema);
 
-// Seed database
+// SeSEED DTABASE
 const seedDatabase = async () => {
   await Thought.deleteMany({});
   data.forEach((thought) => {
