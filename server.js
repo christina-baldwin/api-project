@@ -1,10 +1,11 @@
-import { authenticate } from "./middlewares/authenticate";
 import cors from "cors";
 import express from "express";
 import listEndpoints from "express-list-endpoints";
 import mongoose from "mongoose";
 
 import data from "./data/data.json";
+import { authenticate } from "./middlewares/auth.js";
+import authRoutes from "./routes/auth.js";
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -21,7 +22,6 @@ mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 
 // SCHEMA //
 const thoughtSchema = new mongoose.Schema({
-  id: { type: Number, default: Date.now },
   message: { type: String, required: true, minlength: 3 },
   hearts: { type: Number, default: 0 },
   likedBy: { type: [String], default: [] },
@@ -31,12 +31,10 @@ const thoughtSchema = new mongoose.Schema({
 
 const Thought = mongoose.model("Thought", thoughtSchema);
 
-// SeSEED DTABASE
+// SEED DTABASE
 const seedDatabase = async () => {
   await Thought.deleteMany({});
-  data.forEach((thought) => {
-    new Thought(thought).save();
-  });
+  await Promise.all(data.map((thought) => new Thought(thought).save()));
 };
 seedDatabase();
 
@@ -104,7 +102,7 @@ app.get("/thoughts", async (req, res) => {
 app.get("/thoughts/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const thought = await Thought.findOne({ id: +id });
+    const thought = await Thought.findById(id);
 
     if (!thought) {
       return res.status(404).json({
