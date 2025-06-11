@@ -167,7 +167,7 @@ app.post("/thoughts", async (req, res) => {
 });
 
 // DELETE THOUGHT
-app.delete("/thoughts:id", async (req, res) => {
+app.delete("/thoughts/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -195,7 +195,7 @@ app.delete("/thoughts:id", async (req, res) => {
 });
 
 // PATCH A THOUGHT
-app.patch("thoughts/:id", async (req, res) => {
+app.patch("/thoughts/:id", async (req, res) => {
   const { id } = req.params;
   const { newMessage } = req.body;
 
