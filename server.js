@@ -1,3 +1,4 @@
+import { authenticate } from "./middlewares/authenticate";
 import cors from "cors";
 import express from "express";
 import listEndpoints from "express-list-endpoints";
