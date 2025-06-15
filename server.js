@@ -19,7 +19,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 
 // MONGO DB CONNECTION //
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/thoughts";
+const mongoUrl = process.env.MONGO_URL;
 mongoose.connect(mongoUrl);
 mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
 
@@ -33,13 +33,6 @@ const thoughtSchema = new mongoose.Schema({
 });
 
 const Thought = mongoose.model("Thought", thoughtSchema);
-
-// SEED DTABASE
-const seedDatabase = async () => {
-  await Thought.deleteMany({});
-  await Promise.all(data.map((thought) => new Thought(thought).save()));
-};
-seedDatabase();
 
 // API DOCUMENTATION //
 app.get("/", (req, res) => {
