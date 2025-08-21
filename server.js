@@ -77,7 +77,7 @@ app.get("/thoughts", async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Thoughts retrieved successfully.",
       page: +page,
@@ -86,7 +86,7 @@ app.get("/thoughts", async (req, res) => {
       response: paginatedThoughts,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error fetching thoughts.",
       response: error,
@@ -107,13 +107,13 @@ app.get("/thoughts/:id", async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Thought found.",
       response: thought,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error finding thought.",
       response: error,
@@ -141,20 +141,20 @@ app.get("/thoughts/liked/:clientId", async (req, res) => {
   }
 });
 
-// POST THOUGHT (check what we are sending)
+// POST THOUGHT
 app.post("/thoughts", authenticate, async (req, res) => {
   const { message, category } = req.body;
 
   try {
     const newThought = await new Thought({ message, category }).save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       response: newThought,
       message: "Thought created successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       response: error,
       message: "Couldn't create thought.",
@@ -170,19 +170,20 @@ app.delete("/thoughts/:id", authenticate, async (req, res) => {
     const thought = await Thought.findByIdAndDelete(id);
 
     if (!thought) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         response: null,
-        message: "Thought could not be found. Can't delete,",
+        message: "Thought could not be found. Can't delete.",
       });
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       response: thought,
       message: "Thought successfully deleted.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       response: error,
       message: "Couldn't delete thought.",
@@ -198,9 +199,7 @@ app.patch("/thoughts/:id", authenticate, async (req, res) => {
   try {
     const thought = await Thought.findByIdAndUpdate(
       id,
-      {
-        message: newMessage,
-      },
+      { message: newMessage },
       { new: true, runValidators: true }
     );
 
@@ -208,16 +207,17 @@ app.patch("/thoughts/:id", authenticate, async (req, res) => {
       return res.status(404).json({
         success: false,
         response: null,
-        messsage: "Thought couldn't be found.",
+        message: "Thought couldn't be found.",
       });
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       response: thought,
       message: "Thought updated successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       response: error,
       message: "Thought unable to be updated.",
@@ -225,7 +225,7 @@ app.patch("/thoughts/:id", authenticate, async (req, res) => {
   }
 });
 
-// LIKE
+// LIKE A THOUGHT
 app.post("/thoughts/:id/like", authenticate, async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.id);
@@ -247,15 +247,17 @@ app.post("/thoughts/:id/like", authenticate, async (req, res) => {
     thought.likedBy.push(req.user.id);
     await thought.save();
 
-    res.status(200).json({ success: true, message: "Thought liked", thought });
+    return res
+      .status(200)
+      .json({ success: true, message: "Thought liked", thought });
   } catch (error) {
-    res
+    return res
       .status(500)
       .json({ success: false, message: "Error liking thought", error });
   }
 });
 
-// UNLIKE
+// UNLIKE A THOUGHT
 app.delete("/thoughts/:id/like", authenticate, async (req, res) => {
   try {
     const thought = await Thought.findById(req.params.id);
@@ -278,11 +280,11 @@ app.delete("/thoughts/:id/like", authenticate, async (req, res) => {
     );
     await thought.save();
 
-    res
+    return res
       .status(200)
       .json({ success: true, message: "Thought unliked", thought });
   } catch (error) {
-    res
+    return res
       .status(500)
       .json({ success: false, message: "Error unliking thought", error });
   }
