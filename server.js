@@ -10,7 +10,7 @@ import authRoutes from "./routes/auth.js";
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://happy-thoughts-messaging-app.netlify.app/*",
+  "https://happy-thoughts-messaging-app.netlify.app",
 ];
 
 dotenv.config();
@@ -23,7 +23,12 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) return callback(null, true);
+
+      const allowed = allowedOrigins.map((o) => o.replace(/\/$/, ""));
+      const normalized = origin.replace(/\/$/, "");
+
+      if (allowed.includes(normalized)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -31,7 +36,8 @@ app.use(
     },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    optionsSuccessStatus: 200,
+    credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 
