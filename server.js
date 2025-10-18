@@ -8,13 +8,33 @@ import data from "./data/data.json";
 import { authenticate } from "./middlewares/auth.js";
 import authRoutes from "./routes/auth.js";
 
+const allowedOrigins = [
+  "hhttp://localhost:5173",
+  "https://happy-thoughts-messaging-app.netlify.app/",
+];
+
 dotenv.config();
 
 const port = process.env.PORT || 8080;
 const app = express();
 
 // MIDDLEWARES //
-app.use(cors());
+// app.use(cors());
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 app.use("/auth", authRoutes);
 
