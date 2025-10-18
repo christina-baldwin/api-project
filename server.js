@@ -9,7 +9,7 @@ import { authenticate } from "./middlewares/auth.js";
 import authRoutes from "./routes/auth.js";
 
 const allowedOrigins = [
-  "hhttp://localhost:5173",
+  "http://localhost:5173",
   "https://happy-thoughts-messaging-app.netlify.app/",
 ];
 
