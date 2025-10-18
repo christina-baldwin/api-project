@@ -10,7 +10,7 @@ import authRoutes from "./routes/auth.js";
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://happy-thoughts-messaging-app.netlify.app/",
+  "https://happy-thoughts-messaging-app.netlify.app",
 ];
 
 dotenv.config();
