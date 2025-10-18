@@ -20,7 +20,6 @@ const app = express();
 
 // MIDDLEWARES //
 // app.use(cors());
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -30,10 +29,13 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200,
   })
 );
+
+app.options("*", cors());
 
 app.use(express.json());
 app.use("/auth", authRoutes);
